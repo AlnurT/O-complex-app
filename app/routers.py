@@ -1,22 +1,37 @@
-# from typing import Annotated
-#
-# from fastapi import APIRouter, Depends, HTTPException
-#
-# from app.crud import TableRepository
-# from app.schemas import STableRead, STableAdd, STableStatus
-#
-# tables_router = APIRouter(
-#     prefix="/table",
-#     tags=["Столики"],
-# )
-#
-#
-# @tables_router.get("", summary="Cписок всех столиков")
-# async def get_tables() -> list[STableRead]:
-#     tables = await TableRepository.find_all()
-#     return tables
-#
-#
+from fastapi import APIRouter, HTTPException
+
+from app.schemas import SWeather
+from app.utils import fetch_weather
+
+router = APIRouter(
+    tags=["Погода"],
+)
+
+
+@router.get("/weather", summary="Прогноз погоды")
+async def get_city_weather(city: str) -> SWeather:
+    try:
+        weather = await fetch_weather(city)
+
+    except KeyError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Город {city} не найден",
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Погода недоступна",
+        )
+
+    return weather
+
+
+@router.get("/", summary="Краткое описание")
+async def get_weather():
+    return {'message': "API для показа прогноза погоды"}
+
+
 # @tables_router.post("", summary="Cоздать новый столик")
 # async def add_table(
 #         table: Annotated[STableAdd, Depends()],
