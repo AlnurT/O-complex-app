@@ -5,17 +5,19 @@ from pathlib import Path
 from fastapi import FastAPI
 from starlette.staticfiles import StaticFiles
 
-from app.database import delete_tables, create_tables
+from app.database import delete_tables, create_tables, async_engine
 from app.routers import router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_tables()
-    print("Создание таблиц")
-    yield
+    async_engine.echo = False
     await delete_tables()
     print("Удаление таблиц")
+    await create_tables()
+    print("Создание таблиц")
+    async_engine.echo = True
+    yield
 
 
 app = FastAPI(lifespan=lifespan)

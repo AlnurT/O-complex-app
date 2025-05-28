@@ -7,6 +7,5 @@ class SearchHistoryORM(Base):
     __tablename__ = "search_history"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[str]
     city: Mapped[str]
     count: Mapped[int] = mapped_column(default=1)

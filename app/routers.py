@@ -6,7 +6,8 @@ from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 
-from app.schemas import SWeather
+from app.crud import CitiesDB
+from app.schemas import SWeather, SHistoryRead
 from app.utils import fetch_weather, fetch_cities
 
 router = APIRouter(
@@ -56,32 +57,32 @@ async def get_city_weather(city: str, response: Response) -> SWeather:
             detail=f"Погода недоступна",
         )
 
+    await CitiesDB.add_count_city_requests(city)
     response.set_cookie(key="last_city", value=city)
     return weather
 
 
-# @tables_router.post("", summary="Cоздать новый столик")
-# async def add_table(
-#         table: Annotated[STableAdd, Depends()],
-# ) -> STableStatus:
-#     if await TableRepository.check_table_name(table.name):
-#         raise HTTPException(
-#             status_code=400,
-#             detail="Столик с таким именем уже существует",
-#         )
-#
-#     table = await TableRepository.add_one(table)
-#     return {"data": table, "status": True}
-#
-#
-# @tables_router.delete("/{table_id}", summary="Удалить столик")
-# async def delete_table(table_id: int) -> STableStatus:
-#     table = await TableRepository.delete_one(table_id)
-#
-#     if not table:
-#         raise HTTPException(
-#             status_code=404,
-#             detail=f"Столика c id = {table_id} не существует",
-#         )
-#
-#     return {"data": table, "status": True}
+@router.get("/requests/all", summary="Число запросов по всем городам")
+async def get_cities_requests() -> list[SHistoryRead]:
+    cities = await CitiesDB.count_cities_requests()
+
+    if not cities:
+        raise HTTPException(
+            status_code=400,
+            detail="Запросов на погоду в городах ещё не было",
+        )
+
+    return cities
+
+
+@router.get("/requests", summary="Число запросов по одному городу")
+async def get_city_requests(city: str) -> SHistoryRead:
+    city_model = await CitiesDB.count_city_requests(city)
+
+    if not city_model:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Запросов на погоду в городе {city} ещё не было",
+        )
+
+    return city_model
