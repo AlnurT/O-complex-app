@@ -3,6 +3,24 @@ import httpx
 from app.schemas import SWeather
 
 
+async def fetch_cities(city: str) -> list:
+    if not city:
+        return []
+
+    async with httpx.AsyncClient() as client:
+        url = (
+            f"https://geocoding-api.open-meteo.com/v1/search"
+            f"?name={city}&count=10&language=en"
+        )
+        response = await client.get(url)
+        data = response.json()
+
+        if "results" not in data:
+            return []
+
+        return [item["name"] for item in data["results"]]
+
+
 async def fetch_weather(city: str) -> SWeather:
     async with httpx.AsyncClient() as client:
         geo_url = (
