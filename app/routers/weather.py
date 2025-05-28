@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response
 
-from db.crud import CitiesDB
+from app.db.crud import CitiesDB
 from app.schemas import SWeather
 from app.utils import fetch_weather, fetch_cities
 

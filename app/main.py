@@ -8,7 +8,7 @@ from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-from db.database import delete_tables, create_tables, async_engine
+from app.db.database import delete_tables, create_tables, async_engine
 from app.routers.weather import weather
 from app.routers.requests import city_request
 

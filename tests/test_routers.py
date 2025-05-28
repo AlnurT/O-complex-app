@@ -12,10 +12,8 @@ def client():
 
 @pytest.mark.asyncio
 async def test_get_cities_returns_list(client, monkeypatch):
-    from app.routers import fetch_cities
-
     fetch_cities_mock = AsyncMock(return_value=["Moscow", "Almaty"])
-    monkeypatch.setattr("app.routers.fetch_cities", fetch_cities_mock)
+    monkeypatch.setattr("app.routers.weather.fetch_cities", fetch_cities_mock)
     response = client.get("/cities?city=Moscow")
 
     assert response.status_code == 200
@@ -24,20 +22,17 @@ async def test_get_cities_returns_list(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_city_weather_success(client, monkeypatch):
-    from app.routers import fetch_weather, CitiesDB
-
     weather_data = {
         "country": "Russia",
         "city": "Moscow",
         "temperature": 20,
         "windspeed": 10,
     }
-    monkeypatch.setattr("app.routers.fetch_weather",
+    monkeypatch.setattr("app.routers.weather.fetch_weather",
                         AsyncMock(return_value=weather_data))
     mock_add_count = AsyncMock()
-    monkeypatch.setattr("app.routers.CitiesDB.add_count_city_requests",
+    monkeypatch.setattr("app.routers.weather.CitiesDB.add_count_city_requests",
                         mock_add_count)
-
     response = client.get("/weather?city=Moscow")
 
     assert response.status_code == 200
@@ -53,11 +48,8 @@ async def test_get_city_weather_success(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_city_weather_not_found(client, monkeypatch):
-    from app.routers import fetch_weather
-
-    monkeypatch.setattr("app.routers.fetch_weather",
+    monkeypatch.setattr("app.routers.weather.fetch_weather",
                         AsyncMock(side_effect=KeyError))
-
     response = client.get("/weather?city=A")
 
     assert response.status_code == 404
@@ -66,11 +58,8 @@ async def test_get_city_weather_not_found(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_city_weather_no_access(client, monkeypatch):
-    from app.routers import fetch_weather
-
-    monkeypatch.setattr("app.routers.fetch_weather",
+    monkeypatch.setattr("app.routers.weather.fetch_weather",
                         AsyncMock(side_effect=ValueError))
-
     response = client.get("/weather?city=Moscow")
 
     assert response.status_code == 404
@@ -79,16 +68,13 @@ async def test_get_city_weather_no_access(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_requests_all_success(client, monkeypatch):
-    from app.routers import CitiesDB
-
     cities_data = [
         {"id": 1, "city": "Moscow", "count": 10},
         {"id": 2, "city": "Almaty", "count": 5}
     ]
-    monkeypatch.setattr("app.routers.CitiesDB.count_cities_requests",
+    monkeypatch.setattr("app.routers.requests.CitiesDB.count_cities_requests",
                         AsyncMock(return_value=cities_data))
-
-    response = client.get("/requests/all")
+    response = client.get("/city_requests/all")
 
     assert response.status_code == 200
 
@@ -103,12 +89,9 @@ async def test_get_requests_all_success(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_requests_all_empty(client, monkeypatch):
-    from app.routers import CitiesDB
-
-    monkeypatch.setattr("app.routers.CitiesDB.count_cities_requests",
+    monkeypatch.setattr("app.routers.requests.CitiesDB.count_cities_requests",
                         AsyncMock(return_value=[]))
-
-    response = client.get("/requests/all")
+    response = client.get("/city_requests/all")
 
     assert response.status_code == 400
     assert response.json()["detail"] == \
@@ -117,14 +100,10 @@ async def test_get_requests_all_empty(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_city_requests_success(client, monkeypatch):
-    from app.routers import CitiesDB
-
     city_data = {"id": 1, "city": "Moscow", "count": 10}
-
-    monkeypatch.setattr("app.routers.CitiesDB.count_city_requests",
+    monkeypatch.setattr("app.routers.requests.CitiesDB.count_city_requests",
                         AsyncMock(return_value=city_data))
-
-    response = client.get("/requests?city=Moscow")
+    response = client.get("/city_requests?city=Moscow")
 
     assert response.status_code == 200
 
@@ -136,12 +115,9 @@ async def test_get_city_requests_success(client, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_get_city_requests_not_found(client, monkeypatch):
-    from app.routers import CitiesDB
-
-    monkeypatch.setattr("app.routers.CitiesDB.count_city_requests",
+    monkeypatch.setattr("app.routers.requests.CitiesDB.count_city_requests",
                         AsyncMock(return_value=None))
-
-    response = client.get("/requests?city=A")
+    response = client.get("/city_requests?city=A")
 
     assert response.status_code == 400
     assert response.json()["detail"] == \

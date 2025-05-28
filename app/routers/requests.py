@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from db.crud import CitiesDB
+from app.db.crud import CitiesDB
 from app.schemas import SHistoryRead
 
 city_request = APIRouter(

@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
-from db.database import async_session
-from db.models import SearchHistoryORM
+from app.db.database import async_session
+from app.db.models import SearchHistoryORM
 from app.schemas import SHistoryRead
 
 
