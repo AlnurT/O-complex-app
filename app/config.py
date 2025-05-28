@@ -17,7 +17,7 @@ class Settings(BaseSettings):
                f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     model_config = SettingsConfigDict(
-        env_file=os.path.join(Path(__file__).resolve().parents[1], ".env")
+        env_file=os.path.join(Path(__file__).resolve().parents[1], ".env.docker")
     )
 
 
