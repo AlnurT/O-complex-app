@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("city-input");
+    const prevCity = document.getElementById("prev-city");
     const suggestionsDiv = document.getElementById("suggestions");
     const button = document.getElementById("search-btn");
+    const prevButton = document.getElementById("last-weather-btn");
     const resultDiv = document.getElementById("weather-result");
 
     let debounceTimeout = null;
@@ -33,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 300); // задержка для уменьшения количества запросов
     });
 
-    // Обработка клика по кнопке
     button.addEventListener("click", () => {
         const cityName = input.value.trim();
         if (!cityName) return;
@@ -47,6 +48,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     resultDiv.innerHTML = `
                         <h2>Погода</h2>
+                        <p>Страна: ${data.country}</p>
+                        <p>Город: ${data.city}</p>
+                        <p>Температура: ${data.temperature} °C</p>
+                        <p>Скорость ветра: ${data.windspeed} км/ч</p>
+                    `;
+                }
+            })
+            .catch(() => {
+                resultDiv.innerHTML = `<p style="color:red;">Ошибка при получении данных.</p>`;
+            });
+    });
+
+    prevButton.addEventListener("click", () => {
+        const cityName = prevCity.value;
+
+        resultDiv.innerHTML = "Загружаю...";
+        fetch(`/weather?city=${encodeURIComponent(cityName)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color:red;">${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>Погода</h3>
                         <p>Страна: ${data.country}</p>
                         <p>Город: ${data.city}</p>
                         <p>Температура: ${data.temperature} °C</p>

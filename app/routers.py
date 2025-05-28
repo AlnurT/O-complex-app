@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
@@ -22,7 +22,16 @@ templates = Jinja2Templates(directory=templates_dir)
 
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    prev_city = request.cookies.get("last_city")
+    message = ""
+    if prev_city:
+        message = f"Хотите посмотреть погоду в городе {prev_city}?"
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "message": message,
+        "prev_city": prev_city,
+    })
 
 
 @router.get("/cities")
@@ -32,7 +41,7 @@ async def get_cities(city: str = "") -> list:
 
 
 @router.get("/weather", summary="Прогноз погоды")
-async def get_city_weather(city: str) -> SWeather:
+async def get_city_weather(city: str, response: Response) -> SWeather:
     try:
         weather = await fetch_weather(city)
 
@@ -47,6 +56,7 @@ async def get_city_weather(city: str) -> SWeather:
             detail=f"Погода недоступна",
         )
 
+    response.set_cookie(key="last_city", value=city)
     return weather
 
 

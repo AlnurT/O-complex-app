@@ -7,12 +7,25 @@
 </head>
 <body>
     <h1>Погода по городу</h1>
+
     <div class="search-container">
         <input type="text" id="city-input" placeholder="Введите название города" />
         <button id="search-btn">Получить погоду</button>
         <div id="suggestions"></div>
+
+        {% if message %}
+            <h3>{{ message }}</h3>
+        {% endif %}
+
+        {% if prev_city %}
+            <input type="hidden" id="prev-city" value="{{ prev_city }}" />
+            <button id="last-weather-btn" type="submit">
+                Показать погоду в {{ prev_city }}
+            </button>
+        {% endif %}
+
+        <div id="weather-result"></div>
     </div>
-    <div id="weather-result"></div>
 
     <script src="/static/script.js"></script>
 </body>
